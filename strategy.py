@@ -35,7 +35,6 @@ class MovingAverageCrossover(Strategy):
         long_ma = prices.rolling(self.long_window).mean()
         return np.where(short_ma > long_ma, 1, np.where(short_ma < long_ma, -1, 0))
     
-
 class MeanReversion(Strategy):
     """Buy when price is below the mean by threshold standard deviations, sell when above."""
     
@@ -52,4 +51,4 @@ class MeanReversion(Strategy):
         """Calculate mean reversion signals using rolling z-score."""
         rolling_mean = prices.rolling(self.window).mean()
         rolling_std = prices.rolling(self.window).std()
-        return np.where((prices - rolling_mean) / rolling_std < - self.threshold, 1, np.where((prices - rolling_mean) / rolling_std > self.threshold, -1, 0))
+        return np.where((prices - rolling_mean) / rolling_std < -self.threshold, 1, np.where((prices - rolling_mean) / rolling_std > self.threshold, -1, 0))

@@ -1,11 +1,10 @@
 from data_handler import DataHandler
 from backtest import Backtest
 import pandas as pd
-import numpy as np
 import itertools
 
 class WalkForward:
-
+    """Walk-forward backtesting framework with rolling parameter optimisation."""
     def __init__(self, ticker, start, end, strategy_class, initial_cash, n_splits=5):
         self.ticker = ticker
         self.start = start
@@ -16,6 +15,7 @@ class WalkForward:
         self.param_grid = self.strategy_class.param_grid
 
     def run(self):
+        """Fetch data, split into windows, optimise on train and evaluate on test."""
         dh = DataHandler(self.ticker, self.start, self.end)
         dh.fetch()
         dh.clean()
@@ -36,6 +36,7 @@ class WalkForward:
         return results
     
     def _optimize(self, prices):
+        """Return best parameters by Sharpe ratio on the given price series."""
         param_grid = self.strategy_class.param_grid
         keys = param_grid.keys()
         values = param_grid.values()
@@ -53,12 +54,13 @@ class WalkForward:
             backtest = Backtest(prices, strategy, initial_cash=self.initial_cash)
             backtest.run()
             sharpe = backtest.portfolio.sharpe_ratio()
-            if (best_sharpe is None or sharpe > best_sharpe):
+            if best_sharpe is None or sharpe > best_sharpe:
                 best_params = params
                 best_sharpe = sharpe
         return best_params
 
     def _test(self, params, prices):
+        """Run backtest with given parameters and return performance metrics."""
         strategy = self.strategy_class(**params)
         backtest = Backtest(prices, strategy, initial_cash=self.initial_cash)
         backtest.run()
